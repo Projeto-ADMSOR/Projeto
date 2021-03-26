@@ -1,0 +1,42 @@
+Instalação do Server DHCP (WORK IN PROGRESS)
+
+
+#aptitude install dhcp3-server
+
+	ou
+
+#apt-get install dhcp3-server
+
+# ip link set up dev eth0
+
+# ip addr add 192.168.1.0/24 dev eth0
+
+#cp /etc/dhcpd.conf /etc/dhcpd.conf.example
+
+#nano /etc/dhcpd.conf
+
+	option domain-name-servers 8.8.8.8, 8.8.4.4;
+	option subnet-mask 255.255.0.0;
+	option routers 192.168.1.0;
+	subnet 192.168.1.0 netmask 255.255.0.0 {
+	  range 192.168.1.150 192.168.1.250;
+	}
+
+
+
+Ativação
+
+#/etc/init.d/dhcp3-server start
+
+Desativação
+
+#/etc/init.d/dhcp3-server stop
+
+Renicialização
+
+
+#/etc/init.d/dhcp3-server restart
+
+Status
+
+#/etc/init.d/dhcp3-server status
