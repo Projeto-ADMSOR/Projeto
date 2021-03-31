@@ -1,0 +1,114 @@
+
+A resolução de nomes converte nomes de sistemas no seu endereço IP e vice-versa. Assim, a configuração consiste, basicamente na criação de 2 zonas, uma (zone “home.lan”) 
+que converte nomes em endereços IP e outra (zone “1.168.192.in-addr.arpa”) que converte endereços IP no respectivo nome de sistema.
+
+
+Instalação DNS
+
+#pacman -S bind bind-tools
+
+#wget http://www.internic.net/domain/named.root
+copiar para /var/named
+
+mudar esses endereços de acordo com o que for necessário:
+#cat /etc/systemd/network/eth0.network
+ Address = 192.168.56.14
+
+#cat /etc/systemd/network/eth1.network
+ Address = 10.1.100.254
+
+#ip a s
+
+#nano /etc/named.conf
+options {
+...
+allow-recursion {127.0.0.1; 192.168.56.14; 10.1.100.254; }; #mudar endereço ip de acordo com a maquina
+//allow-update {none; };
+…..
+};
+zone "."{
+ type hint;
+ file "named.root";
+};
+...
+zone "matrix.localdomain" IN {
+ type master;
+ file "matrix.zone";
+};
+zone "1.10.in-addr.arpa" IN {
+ type master;
+ file "1.10.zone";
+};
+
+
+#nano /var/named/matrix.zone
+$ORIGIN matrix.localdomain.
+$TTL 86400
+matrix.localdomain. IN SOA ns.matrix.localdomain. root.ns.matrix.localdomain. (
+ 2021032400; SERIAL
+ 28800; REFRESH
+ 14400; RETRY
+ 3600000; EXPIRY (1000H)
+ 86400; default TTL
+)
+matrix.localdomain. IN NS ns.matrix.localdomain.
+matrix.localdomain. IN MX 0 ns.matrix.localdomain.
+ns IN A 10.1.100.254
+smith IN A 10.1.100.253
+neo IN A 10.1.100.252
+niobe IN A 10.1.100.251
+zion IN A 10.1.100.250
+
+#nano /var/named/1.10.zone
+@ IN SOA ns.matrix.localdomain. root.ns.matrix.localdomain. (
+ 2021031100; SERIAL NUMBER #data de última alteração
+ 28800; REFRESH
+ 14400; RETRY
+ 3600000; EXPIRY
+ 86400; MINIMUM NEGATIVE TTL
+)
+1.10.in-addr.arpa. IN NS ns.matrix.localdomain.
+254.100 IN PTR ns.matrix.localdomain.
+253.100 IN PTR smith.matrix.localdomain.
+252.100 IN PTR neo.matrix.localdomain.
+251.100 IN PTR niobe.matrix.localdomain.
+250.100 IN PTR zion.matrix.localdomain.
+
+#nano /etc/nsswitch.conf
+hosts:	file dns mymachines myhostname resolve [!UNAVAIL=return]
+
+#systemctl status dhcp
+
+#nano /etc/resolv.conf
+nameserver 10.1.100.254 #server local nosso
+search matrix.localdomain
+(comentar o resto das linhas)
+
+#named-checkconf /etc/named.conf
+#named-checkzone matrix.localdomain /var/named/matrix.zone
+#named-checkzone 1.10.in-addr.arpa /var/anmed/1.10.zone
+
+
+testes 
+#systemctl status named
+
+#systemctl start named
+
+#systemctl enable named
+
+#systemctl status named
+
+
+#dig +search zion.matrix.localdomain
+
+#nslookup zion
+
+#nslookup zion.matrix.localdomain
+
+#nslookup neo.matrix.localdomain
+
+#nslookup ns.matrix.localdomain
+
+#nano /var/named/matrix.zone
+joao	IN TXT "Telefone: +55 11 8888-8888"
+
