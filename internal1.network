@@ -1,4 +1,4 @@
 [Match]
-Name=eth1
+Name=internal1
 [Network]
 Address=10.10.15.1/24

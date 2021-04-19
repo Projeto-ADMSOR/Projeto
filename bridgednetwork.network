@@ -1,5 +1,5 @@
 [Match]
-Name=eth0
+Name=bridgednetwork
 [Network]
 Address=192.168.100.9/24
 Gateway=192.168.100.1
